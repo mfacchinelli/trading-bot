@@ -8,6 +8,7 @@ class BotStrategy(object):
 		self.prices = []
 		self.closes = [] # Needed for Momentum Indicator
 		self.trades = []
+		self.profit = []
 		self.currentPrice = ""
 		self.currentClose = ""
 		self.numSimulTrades = 1
@@ -24,7 +25,7 @@ class BotStrategy(object):
 
 		self.evaluatePositions()
 		self.updateOpenTrades()
-		self.showPositions()
+		self.profit.append(sum(self.showPositions()))
 
 	def evaluatePositions(self):
 		openTrades = []
@@ -46,7 +47,10 @@ class BotStrategy(object):
 				trade.tick(self.currentPrice)
 
 	def showPositions(self):
-		for trade in self.trades:
-			trade.showTrade()
 
-		
+		profitList = []
+
+		for trade in self.trades:
+			profitList.append(trade.showTrade())
+
+		return profitList
