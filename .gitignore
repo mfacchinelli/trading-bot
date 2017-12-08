@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# confidential data
+part 3/botchart.py
