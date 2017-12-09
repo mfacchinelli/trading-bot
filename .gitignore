@@ -102,3 +102,5 @@ ENV/
 
 # confidential data
 part 3/botchart.py
+
+*.pyc
