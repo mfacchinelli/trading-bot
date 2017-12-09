@@ -1,38 +1,45 @@
 from botlog import BotLog
 
-class BotTrade(object):
-	def __init__(self,currentPrice,stopLoss=0):
-		self.output = BotLog()
-		self.status = "OPEN"
-		self.entryPrice = currentPrice
-		self.exitPrice = ""
-		self.output.log("Trade opened")
-		if (stopLoss):
-			self.stopLoss = currentPrice - stopLoss
+# Labels
+openLabel = "OPEN"
+closedLabel = "CLOSED"
+
+# Overbuying and underselling coefficients
+epsilon = 0.001
+overCoefficient = float( 1 ) + epsilon
+underCoefficient = float( 1 ) - epsilon
+
+class BotTrade( object ):
+	def __init__( self, currentPrice, stopLoss ):
+		self.output = BotLog( )
+		self.status = openLabel
+		self.entryPrice = overCoefficient * currentPrice
+		self.exitPrice = float( 0 )
+		self.output.log( "Trade opened" )
+		self.stopLoss = stopLoss
 	
-	def close(self,currentPrice):
-		self.status = "CLOSED"
-		self.exitPrice = currentPrice
-		self.output.log("Trade closed")
+	def close( self, currentPrice ):
+		self.status = closedLabel
+		self.exitPrice = underCoefficient * currentPrice
+		self.output.log( "Trade closed" )
 
-	def tick(self, currentPrice):
-		if (self.stopLoss):
-			if (currentPrice < self.stopLoss):
-				self.close(currentPrice)
+	def tick( self, currentPrice ):
+		if ( currentPrice < self.stopLoss ):
+			self.close( currentPrice )
 
-	def showTrade(self):
-		tradeStatus = "Entry Price: "+str(self.entryPrice)+" Status: "+str(self.status)+" Exit Price: "+str(self.exitPrice)
-		profit = float(0)
+	def showTrade( self ):
+		tradeStatus = "Entry Price: " + str( self.entryPrice ) + " Status: " + str( self.status )
+		profit = float( 0 )
 
-		if (self.status == "CLOSED"):
-			tradeStatus = tradeStatus + " Profit: "
-			if (self.exitPrice > self.entryPrice):
+		if ( self.status == closedLabel ):
+			tradeStatus = tradeStatus + " Exit Price: " + str( self.exitPrice ) + " Profit: "
+			if ( self.exitPrice > self.entryPrice ):
 				tradeStatus = tradeStatus + "\033[92m"
 			else:
 				tradeStatus = tradeStatus + "\033[91m"
 
 			profit = self.exitPrice - self.entryPrice
-			tradeStatus = tradeStatus+str(profit)+"\033[0m"
+			tradeStatus = tradeStatus + str( profit ) + "\033[0m"
 
-		self.output.log(tradeStatus)
+		self.output.log( tradeStatus )
 		return profit
