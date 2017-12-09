@@ -12,8 +12,8 @@ class BotIndicators( object ):
 		if ( len( dataPoints ) > period - 1 ):
 			return dataPoints[-1] * 100 / dataPoints[-period]
 
-	def EMA( self, prices, period ):
-		x = numpy.asarray( prices )
+	def exponentialMovingAverage( self, dataPoints, period ):
+		x = numpy.asarray( dataPoints )
 		weights = None
 		weights = numpy.exp( numpy.linspace( -1., 0., period ) )
 		weights /= weights.sum( )
@@ -22,21 +22,21 @@ class BotIndicators( object ):
 		a[:period] = a[period]
 		return a
 
-	def MACD( self, prices, nslow = 26, nfast = 12 ):
-		emaslow = self.EMA( prices, nslow )
-		emafast = self.EMA( prices, nfast )
+	def movingAverageConvergenceDivergence( self, dataPoints, nslow = 26, nfast = 12 ):
+		emaslow = self.EMA( dataPoints, nslow )
+		emafast = self.EMA( dataPoints, nfast )
 		return emaslow, emafast, emafast - emaslow		
 
-	def RSI( self, prices, period = 14 ):
-		deltas = np.diff( prices )
+	def relativeStrangthIndex( self, dataPoints, period = 14 ):
+		deltas = np.diff( dataPoints )
 		seed = deltas[:period+1]
 		up = seed[seed >= 0].sum( ) / period
 		down = -seed[seed < 0].sum( ) / period
-		rs = up/down
-		rsi = np.zeros_like( prices )
-		rsi[:period] = 100. - 100./(1. + rs)
+		rs = up / down
+		rsi = np.zeros_like( dataPoints )
+		rsi[:period] = 100. - 100./( 1. + rs )
  
-		for i in range( period, len( prices ) ):
+		for i in range( period, len( dataPoints ) ):
  			delta = deltas[i - 1]  # cause the diff is 1 shorter
   			if delta > 0:
  				upval = delta
@@ -45,11 +45,11 @@ class BotIndicators( object ):
  				upval = 0.
  				downval = -delta
  
- 			up = ( up * ( period - 1) + upval ) / period
- 			down = ( down * ( period - 1) + downval ) / period
+ 			up = ( up * ( period - 1 ) + upval ) / period
+ 			down = ( down * ( period - 1 ) + downval ) / period
   			rs = up/down
  			rsi[i] = 100. - 100. / ( 1. + rs )
-  		if len( prices ) > period:
+  		if len( dataPoints ) > period:
  			return rsi[-1]
  		else:
- 			return 50 # output a neutral amount until enough prices in list to calculate RSI
+ 			return 50 # output a neutral amount until enough data points in list to calculate RSI

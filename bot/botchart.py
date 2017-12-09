@@ -39,7 +39,6 @@ class BotChart( object ):
 
 				self.data = rawdata["result"]
 
-
 	def getPoints( self ):
 		return self.data
 
