@@ -9,6 +9,9 @@ epsilon = 0.001
 overCoefficient = float( 1 ) + epsilon
 underCoefficient = float( 1 ) - epsilon
 
+# Trading commission
+commission = 0.995
+
 class BotTrade( object ):
 	def __init__( self, currentPrice, stopLoss ):
 		self.output = BotLog( )
@@ -38,7 +41,7 @@ class BotTrade( object ):
 			else:
 				tradeStatus = tradeStatus + "\033[91m"
 
-			profit = self.exitPrice - self.entryPrice
+			profit = commission * ( self.exitPrice - self.entryPrice )
 			tradeStatus = tradeStatus + str( profit ) + "\033[0m"
 
 		self.output.log( tradeStatus )
