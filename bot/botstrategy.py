@@ -2,6 +2,13 @@ from botlog import BotLog
 from botindicators import BotIndicators
 from bottrade import BotTrade
 
+# Labels
+openLabel = "OPEN"
+closedLabel = "CLOSED"
+
+# Profit margin for sell
+profitMargin = 1.01
+
 class BotStrategy( object ):
 	def __init__( self ):
 		self.output = BotLog( )
@@ -18,21 +25,23 @@ class BotStrategy( object ):
 	def tick( self, candlestick ):
 		self.currentPrice = float( candlestick.priceAverage )
 		self.prices.append( self.currentPrice )
-		
 		# self.currentClose = float( candlestick['close'] )
 		# self.closes.append( self.currentClose )
-		
+
 		average = self.indicators.movingAverage( self.prices, 15 )
-		self.output.log( "Price: " + str( candlestick.priceAverage ) + "\tMoving Average: " + str( average ) )
+		if ( average is None ):
+			average = 0
+
+		message = "Price: %.3f \tMoving Average: %.3f" % ( candlestick.priceAverage, average )
+		self.output.log( "Price: " + str( candlestick.priceAverage ) + "\tMoving Average: " +  str( average ) )
 
 		self.evaluatePositions( )
-		self.updateOpenTrades( )
-		self.profit.append( sum( self.showPositions( ) ) )
+		self.profit.append( sum( self.updateTrades( ) ) )
 
 	def evaluatePositions( self ):
 		openTrades = []
 		for trade in self.trades:
-			if ( trade.status == "OPEN" ):
+			if ( trade.status == openLabel ):
 				openTrades.append( trade )
 
 		if ( len( openTrades ) < self.numSimulTrades ):
@@ -40,16 +49,17 @@ class BotStrategy( object ):
 				self.trades.append( BotTrade( self.currentPrice, self.stopLoss ) )
 
 		for trade in openTrades:
-			if ( self.currentPrice > self.indicators.movingAverage( self.prices, 15 ) and trade.entryPrice < self.currentPrice ):
-				trade.close( self.currentPrice )
+			if ( self.currentPrice > self.indicators.movingAverage( self.prices, 15 ) and profitMargin * trade.entryPrice < self.currentPrice ):
+				trade.close( self.currentPrice )			
 
-	def updateOpenTrades( self ):
-		for trade in self.trades:
-			if ( trade.status == "OPEN" ):
-				trade.tick( self.currentPrice )
-
-	def showPositions( self ):
+	def updateTrades( self ):
+		i = 0
 		profitList = []
 		for trade in self.trades:
-			profitList.append( trade.showTrade( ) )
+			if ( trade.status == openLabel ):
+				trade.tick( self.currentPrice )
+			elif ( trade.status == closedLabel ):
+				profitList.append( trade.showTrade( ) )
+				del self.trades[i]
+			i += 1
 		return profitList
