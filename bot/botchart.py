@@ -3,7 +3,11 @@ import urllib, json
 import pprint
 from botcandlestick import BotCandlestick
 
+# Allowed falues
 allowed = [ 300, 900, 1800, 7200, 14400, 86400 ]
+
+# File name for API
+fileName = "credentials.txt"
 
 class BotChart( object ):
 	def __init__( self, exchange, pair, period, backtest = True ):
@@ -15,13 +19,20 @@ class BotChart( object ):
 			sys.exit(2)
 
 		self.startTime = 1512086400
-		self.endTime = self.startTime + 7 * 86400
+		self.endTime = self.startTime + 8 * 86400
 
 		self.data = []
 		
 		if ( exchange == "poloniex" ):
-			self.conn = poloniex( 'I53E06MT-G40PI4S0-9ITBOEH8-HMMF10OA', 
-				'b3b9a8fbdbfdf26d9bc7a2915cc39f62404a6ed2a2fce3f1867234342388e2f3783c3631c7de375b6d76e751f83eef7f901315b7af3e9474f294dc07d8cf767e' )
+			# Get credentials
+			fileObject = open( fileName, 'r' )
+			content = fileObject.readlines()
+			key = content[0]
+			code = content[1]
+			fileObject.close()
+
+			# API
+			self.conn = poloniex( key, code )
 
 			if backtest:
 				poloData = self.conn.api_query( "returnChartData" , {"currencyPair":self.pair,"start":self.startTime,"end":self.endTime,"period":self.period})

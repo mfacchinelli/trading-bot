@@ -6,8 +6,14 @@ from bottrade import BotTrade
 openLabel = "OPEN"
 closedLabel = "CLOSED"
 
+# Moving average
+movingAveragePeriod = 10
+
 # Profit margin for sell
-profitMargin = 1.01
+profitMargin = 1.1
+
+# Stop loss
+stopLoss = 0.01
 
 class BotStrategy( object ):
 	def __init__( self ):
@@ -16,7 +22,6 @@ class BotStrategy( object ):
 		self.closes = [ ] # needed for momentum indicator
 		self.trades = [ ]
 		self.profit = [ ]
-		self.stopLoss = 1e-5
 		self.currentPrice = ""
 		self.currentClose = ""
 		self.numSimulTrades = 5
@@ -28,12 +33,12 @@ class BotStrategy( object ):
 		# self.currentClose = float( candlestick['close'] )
 		# self.closes.append( self.currentClose )
 
-		average = self.indicators.movingAverage( self.prices, 15 )
+		average = self.indicators.movingAverage( self.prices, movingAveragePeriod )
 		if ( average is None ):
 			average = 0
 
-		message = "Price: %.3f \tMoving Average: %.3f" % ( candlestick.priceAverage, average )
-		self.output.log( "Price: " + str( candlestick.priceAverage ) + "\tMoving Average: " +  str( average ) )
+		message = "Price: %.3e \tMoving Average: %.3e" % ( candlestick.priceAverage, average )
+		self.output.log( message )
 
 		self.evaluatePositions( )
 		self.profit.append( sum( self.updateTrades( ) ) )
@@ -45,11 +50,11 @@ class BotStrategy( object ):
 				openTrades.append( trade )
 
 		if ( len( openTrades ) < self.numSimulTrades ):
-			if ( self.currentPrice < self.indicators.movingAverage( self.prices, 15 ) ):
-				self.trades.append( BotTrade( self.currentPrice, self.stopLoss ) )
+			if ( self.currentPrice < self.indicators.movingAverage( self.prices, movingAveragePeriod ) ):
+				self.trades.append( BotTrade( self.currentPrice, stopLoss ) )
 
 		for trade in openTrades:
-			if ( self.currentPrice > self.indicators.movingAverage( self.prices, 15 ) and profitMargin * trade.entryPrice < self.currentPrice ):
+			if ( self.currentPrice > self.indicators.movingAverage( self.prices, movingAveragePeriod ) and profitMargin * trade.entryPrice < self.currentPrice ):
 				trade.close( self.currentPrice )			
 
 	def updateTrades( self ):
@@ -62,4 +67,5 @@ class BotStrategy( object ):
 				profitList.append( trade.showTrade( ) )
 				del self.trades[i]
 			i += 1
+		
 		return profitList

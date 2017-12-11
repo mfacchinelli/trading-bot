@@ -101,6 +101,6 @@ ENV/
 .mypy_cache/
 
 # confidential data
-part 3/botchart.py
+bot/credentials.txt
 
 *.pyc
