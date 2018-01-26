@@ -1,19 +1,7 @@
 from botlog import BotLog
 from botindicators import BotIndicators
 from bottrade import BotTrade
-
-# Labels
-openLabel = "OPEN"
-closedLabel = "CLOSED"
-
-# Moving average
-movingAveragePeriod = 10
-
-# Profit margin for sell
-profitMargin = 1.1
-
-# Stop loss
-stopLoss = 0.01
+from botconstants import exchange, openLabel, closedLabel, movingAveragePeriod, profitMargin, stopLoss
 
 class BotStrategy( object ):
 	def __init__( self ):
@@ -28,7 +16,10 @@ class BotStrategy( object ):
 		self.indicators = BotIndicators( )
 
 	def tick( self, candlestick ):
-		self.currentPrice = float( candlestick.priceAverage )
+		if exchange is "poloneix":
+			self.currentPrice = float( candlestick.priceAverage )
+		elif exchange is "bittrex":
+			self.currentPrice = float( candlestick["C"] )
 		self.prices.append( self.currentPrice )
 		# self.currentClose = float( candlestick['close'] )
 		# self.closes.append( self.currentClose )
@@ -36,8 +27,10 @@ class BotStrategy( object ):
 		average = self.indicators.movingAverage( self.prices, movingAveragePeriod )
 		if ( average is None ):
 			average = 0
+		if ( len( self.prices ) > 2 * movingAveragePeriod ):
+			self.indicators.movingAverageConvergenceDivergence( self.prices, 2 * movingAveragePeriod, movingAveragePeriod )
 
-		message = "Price: %.3e \tMoving Average: %.3e" % ( candlestick.priceAverage, average )
+		message = "Price: %.3e \tMoving Average: %.3e" % ( self.currentPrice, average )
 		self.output.log( message )
 
 		self.evaluatePositions( )

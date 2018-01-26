@@ -1,21 +1,5 @@
 from botlog import BotLog
-
-# Labels
-openLabel = "OPEN"
-closedLabel = "CLOSED"
-
-# Overbuying and underselling coefficients
-epsilon = 0.001
-overCoefficient = float( 1 ) + epsilon
-underCoefficient = float( 1 ) - epsilon
-
-# Trading commission
-commission = 0.995
-
-# Colors
-green = "\033[92m"
-red = "\033[91m"
-white = "\033[0m"
+from botconstants import openLabel, closedLabel, overCoefficient, underCoefficient, investment, commission, green, red, white
 
 class BotTrade( object ):
 	def __init__( self, currentPrice, stopLoss ):
@@ -44,7 +28,7 @@ class BotTrade( object ):
 		else:
 			tradeStatus = tradeStatus + red
 
-		profit = commission * ( self.exitPrice - self.entryPrice )
+		profit = commission * investment * ( self.exitPrice - self.entryPrice )
 		tradeStatus = tradeStatus + str( profit ) + white 
 
 		self.output.log( tradeStatus )

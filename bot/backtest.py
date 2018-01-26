@@ -2,14 +2,13 @@ import sys, getopt
 
 from botchart import BotChart
 from botstrategy import BotStrategy
-
-# Colors
-green = "\033[92m"
-red = "\033[91m"
-white = "\033[0m"
+from botconstants import exchange, green, red, white
 
 def main( argv ):
-	chart = BotChart( "poloniex", "BTC_EMC2", 300 )
+	if exchange is "poloniex":
+		chart = BotChart( "BTC_EMC2", 300 )
+	elif exchange is "bittrex":
+		chart = BotChart( "BTC-ADA", "fiveMin" )
 
 	strategy = BotStrategy( )
 

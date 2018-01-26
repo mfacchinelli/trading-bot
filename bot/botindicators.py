@@ -8,10 +8,6 @@ class BotIndicators( object ):
 		if ( len( dataPoints ) > 1 ):
 			return sum( dataPoints[-period:] ) / float( len( dataPoints[-period:] ) )
 
-	def momentum( self, dataPoints, period = 14 ):
-		if ( len( dataPoints ) > period - 1 ):
-			return dataPoints[-1] * 100 / dataPoints[-period]
-
 	def exponentialMovingAverage( self, dataPoints, period ):
 		x = numpy.asarray( dataPoints )
 		weights = None
@@ -23,9 +19,13 @@ class BotIndicators( object ):
 		return a
 
 	def movingAverageConvergenceDivergence( self, dataPoints, nslow = 26, nfast = 12 ):
-		emaslow = self.EMA( dataPoints, nslow )
-		emafast = self.EMA( dataPoints, nfast )
+		emaslow = self.exponentialMovingAverage( dataPoints, nslow )
+		emafast = self.exponentialMovingAverage( dataPoints, nfast )
 		return emaslow, emafast, emafast - emaslow		
+
+	def momentum( self, dataPoints, period = 14 ):
+		if ( len( dataPoints ) > period - 1 ):
+			return dataPoints[-1] * 100 / dataPoints[-period]
 
 	def relativeStrangthIndex( self, dataPoints, period = 14 ):
 		deltas = np.diff( dataPoints )

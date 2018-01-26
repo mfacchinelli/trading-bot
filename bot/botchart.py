@@ -2,24 +2,22 @@ from poloniex import poloniex
 import urllib, json
 import pprint
 from botcandlestick import BotCandlestick
-
-# Allowed falues
-allowed = [ 300, 900, 1800, 7200, 14400, 86400 ]
-
-# File name for API
-fileName = "credentials.txt"
+from botconstants import exchange, allowed, fileName
 
 class BotChart( object ):
-	def __init__( self, exchange, pair, period, backtest = True ):
+	def __init__( self, pair, period, backtest = True ):
 		self.pair = pair
-		if ( int( period ) in allowed ):
+		if exchange is "poloniex":
+			if ( int( period ) in allowed ):
+				self.period = period
+			else:
+				print 'Periods should be in 300, 900, 1800, 7200, 14400, or 86400 second increments'
+				sys.exit(2)
+		elif exchange is "bittrex":
 			self.period = period
-		else:
-			print 'Periods should be in 300, 900, 1800, 7200, 14400, or 86400 second increments'
-			sys.exit(2)
 
-		self.startTime = 1512086400
-		self.endTime = self.startTime + 8 * 86400
+		self.startTime = 1512086400 + 0 * 86400 # start date is December 1st 2017
+		self.endTime = self.startTime + 1 * 86400
 
 		self.data = []
 		
@@ -44,7 +42,7 @@ class BotChart( object ):
 		if ( exchange == "bittrex" ):
 			if backtest:
 				url = "https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=" + self.pair + "&tickInterval=" + \
-				+ self.period + "&_=" + str(self.startTime)
+					self.period + "&_=" + str( self.startTime )
 				response = urllib.urlopen( url )
 				rawdata = json.loads( response.read( ) )
 
